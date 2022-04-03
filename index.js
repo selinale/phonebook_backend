@@ -1,8 +1,24 @@
 
 const express = require('express')
+const morgan = require('morgan')
 const app = express()
 
 app.use(express.json())
+
+morgan.token('request', function (tokens, req, res) {
+    return JSON.stringify(tokens, req, res)
+}) 
+
+app.use(morgan(function (tokens, req, res) {
+    return [
+        tokens.method(req, res),
+        tokens.url(req, res),
+        tokens.status(req, res),
+        tokens.res(req, res, 'content-length'), '-',
+        tokens['response-time'](req, res), 'ms',
+        tokens['request'](req.body)
+    ].join(' ')
+}))
 
 const generateId = () => {
     const id = Math.floor(Math.random() * 50000)
@@ -66,7 +82,6 @@ app.post('/api/persons', (req,res) => {
         return person.name
     })
 
-    console.log(persons.includes('Arto Hellas'))
 
     if (!body.name) {
         return res.status(400).json({
@@ -82,7 +97,6 @@ app.post('/api/persons', (req,res) => {
         })
     }
 
-    console.log(persons)
 
     const person = {
         id: generateId(),
@@ -93,7 +107,6 @@ app.post('/api/persons', (req,res) => {
     
     res.json(person)
 
-    console.log(persons)
 })
 
 const PORT = 3001
