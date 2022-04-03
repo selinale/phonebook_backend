@@ -2,7 +2,7 @@
   "name": "phonebook_backend",
   "version": "1.0.0",
   "description": "phonebook backend",
-  "main": "index.js",
+  "main": "build/index.html",
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
