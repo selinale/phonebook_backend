@@ -1,8 +1,21 @@
-
+require('dotenv').config()
 const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
+const Person = require('./models/person')
 const app = express()
+const mongoose = require('mongoose')
+
+const url = process.env.MONGODB_URI
+
+console.log('connecting to', url)
+mongoose.connect(url)
+    .then(result => {
+        console.log('connected to MongoDB')
+    })
+    .catch((error) => {
+        console.log('error connecting to MongoDB:', error.message)
+    })
 
 app.use(express.json())
 app.use(cors())
@@ -27,6 +40,11 @@ const generateId = () => {
     const id = Math.floor(Math.random() * 50000)
     return id
 }
+
+const PORT = process.env.PORT
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`)
+}) 
 
 let persons = [
     {
@@ -57,18 +75,25 @@ app.get('/info', (req, res) => {
 })
 
 app.get('/api/persons', (req, res) => {
-    res.json(persons)
+    Person.find({}).then(persons => {
+        res.json(persons)
+    })
 })
 
 app.get('/api/persons/:id', (req, res) => {
-    const id = Number(req.params.id)
+    /* const id = Number(req.params.id)
     const person = persons.find(person => person.id === id)
-    
-    if (person) {
+     */
+
+    Person.findById(req.params.id).then(person => {
+        res.json(person)
+    })
+
+   /*  if (person) {
         res.json(person)
     } else {
         res.status(404).end()
-    }
+    } */
 })
 
 app.delete('/api/persons/:id', (req, res) => {
@@ -106,13 +131,10 @@ app.post('/api/persons', (req,res) => {
         name: body.name,
         number: body.number
     }
-    persons = persons.concat(person)
+    // persons = persons.concat(person)
     
-    res.json(person)
+    person.save().then(savedPerson => {
+        res.json(savedPerson)
+    })
 
-})
-
-const PORT = process.env.PORT || 3001
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`)
 })
