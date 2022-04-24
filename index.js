@@ -10,165 +10,158 @@ const url = process.env.MONGODB_URI
 
 console.log('connecting to', url)
 mongoose.connect(url)
-    .then(result => {
-        console.log('connected to MongoDB')
-    })
-    .catch((error) => {
-        console.log('error connecting to MongoDB:', error.message)
-    })
+  .then(result => {
+    console.log('connected to MongoDB')
+  })
+  .catch((error) => {
+    console.log('error connecting to MongoDB:', error.message)
+  })
 
 app.use(express.json())
 app.use(cors())
 app.use(express.static('build'))
 
 morgan.token('request', function (tokens, req, res) {
-    return JSON.stringify(tokens, req, res)
-}) 
+  return JSON.stringify(tokens, req, res)
+})
 
 app.use(morgan(function (tokens, req, res) {
-    return [
-        tokens.method(req, res),
-        tokens.url(req, res),
-        tokens.status(req, res),
-        tokens.res(req, res, 'content-length'), '-',
-        tokens['response-time'](req, res), 'ms',
-        tokens['request'](req.body)
-    ].join(' ')
+  return [
+    tokens.method(req, res),
+    tokens.url(req, res),
+    tokens.status(req, res),
+    tokens.res(req, res, 'content-length'), '-',
+    tokens['response-time'](req, res), 'ms',
+    tokens['request'](req.body)
+  ].join(' ')
 }))
 
 const generateId = () => {
-    const id = Math.floor(Math.random() * 50000)
-    return id
+  const id = Math.floor(Math.random() * 50000)
+  return id
 }
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`)
-}) 
+  console.log(`Server running on port ${PORT}`)
+})
 
 /* let persons = [
     {
         "id": 1,
-        "name": "Arto Hellas", 
+        "name": "Arto Hellas",
         "number": "040-123456"
     },
-    { 
+    {
         "id": 2,
-        "name": "Ada Lovelace", 
+        "name": "Ada Lovelace",
         "number": "39-44-5323523"
     },
-    { 
+    {
         "id": 3,
-        "name": "Dan Abramov", 
+        "name": "Dan Abramov",
         "number": "12-43-234345"
     },
-    { 
+    {
         "id": 4,
-        "name": "Mary Poppendieck", 
+        "name": "Mary Poppendieck",
         "number": "39-23-6423122"
-    },  
+    },
 ] */
 
 app.get('/info', (req, res) => {
-    Person.find({}).then(persons => {
-        res.send(`<p>Phonebook has ${persons.length} people </p> <br>
+  Person.find({}).then(persons => {
+    res.send(`<p>Phonebook has ${persons.length} people </p> <br>
         ${new Date()}`)
-    })
+  })
 })
 
 
 app.get('/api/persons', (req, res) => {
-    Person.find({}).then(persons => {
-        res.json(persons)
-    })
+  Person.find({}).then(persons => {
+    res.json(persons)
+  })
 })
 
 app.get('/api/persons/:id', (req, res, next) => {
 
-    Person.findById(req.params.id)
-        .then(person => {
-            if (person) {
-                res.json(person)
-            } else {
-                res.status(404).end()
-            }
+  Person.findById(req.params.id)
+    .then(person => {
+      if (person) {
+        res.json(person)
+      } else {
+        res.status(404).end()
+      }
     })
     .catch(error => next(error))
 
 })
 
 app.delete('/api/persons/:id', (req, res, next) => {
-    Person.findByIdAndRemove(req.params.id)
-        .then(result => {
-            res.status(204).end()
-        })
-        .catch(error => next(error))
-    
+  Person.findByIdAndRemove(req.params.id)
+    .then(result => {
+      res.status(204).end()
+    })
+    .catch(error => next(error))
 })
 
 app.put('/api/persons/:id', (req, res, next) => {
-    const {name, number} = req.body
+  const { name, number } = req.body
 
-/*     const person = {
-        id: generateId(),
-        name: body.name,
-        number: body.number
-    } */
-
-    Person.findByIdAndUpdate(
-        req.params.id, 
-        {name, number}, 
-        { new: true, runValidators: true, context: 'query'})
-        .then(updatedPerson => {
-            res.json(updatedPerson)
-        })
-        .catch(error => next(error))
+  Person.findByIdAndUpdate(
+    req.params.id,
+    { name, number },
+    { new: true, runValidators: true, context: 'query' })
+    .then(updatedPerson => {
+      res.json(updatedPerson)
+    })
+    .catch(error => next(error))
 })
 
 app.post('/api/persons', (req,res, next) => {
-     const body = req.body
- 
-    if (!body.name) {
-        return res.status(400).json({
-            error: 'name missing'
-        })
-    } 
-    
-    if (!body.number) {
-        return res.status(400).json({
-            error: 'number missing'
-        })
-    } 
+  const body = req.body
 
-    const person = new Person({
-        id: generateId(),
-        name: body.name,
-        number: body.number
+  if (!body.name) {
+    return res.status(400).json({
+      error: 'name missing'
     })
-    
-    person.save()
-        .then(savedPerson => {
-            res.json(savedPerson)
+  }
+
+  if (!body.number) {
+    return res.status(400).json({
+      error: 'number missing'
+    })
+  }
+
+  const person = new Person({
+    id: generateId(),
+    name: body.name,
+    number: body.number
+  })
+
+  person.save()
+    .then(savedPerson => {
+      res.json(savedPerson)
     })
     .catch(error => next(error))
 })
 
 const unknownEndpoint = (req, res) => {
-    res.status(404).send({ error: 'unknown endpoint'})
+  res.status(404).send({ error: 'unknown endpoint' })
 }
 
 app.use(unknownEndpoint)
 
 const errorHandler = (error, req, res, next) => {
-    console.error(error.message)
+  console.error(error.message)
 
-    if (error.name === 'CastError') {
-        return res.status(400).send({ error: 'malformatted id'})
-    } else if (error.name === 'ValidationError') {
-        return res.status(400).json({ error: error.message})
-    }
+  if (error.name === 'CastError') {
+    return res.status(400).send({ error: 'malformatted id' })
+  } else if (error.name === 'ValidationError') {
+    return res.status(400).json({ error: error.message })
+  }
 
-    next(error)
+  next(error)
 }
 
 app.use(errorHandler)
