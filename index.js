@@ -46,7 +46,7 @@ app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
 }) 
 
-let persons = [
+/* let persons = [
     {
         "id": 1,
         "name": "Arto Hellas", 
@@ -67,11 +67,13 @@ let persons = [
         "name": "Mary Poppendieck", 
         "number": "39-23-6423122"
     },  
-]
+] */
 
 app.get('/info', (req, res) => {
-    res.send(`<p>Phonebook has ${persons.length} people </p> <br>
-            ${new Date()}`)
+    Person.find({}).then(persons => {
+        res.send(`<p>Phonebook has ${persons.length} people </p> <br>
+        ${new Date()}`)
+    })
 })
 
 
@@ -121,27 +123,30 @@ app.put('/api/persons/:id', (req, res, next) => {
 })
 
 app.post('/api/persons', (req,res) => {
-    const body = req.body
+     const body = req.body
 
-    const personName = persons.map(function(person) {
+/*     const personName = persons.map(function(person) {
         return person.name
-    })
+    }) */
 
-
+ 
     if (!body.name) {
         return res.status(400).json({
             error: 'name missing'
         })
-    } else if (!body.number) {
+    } 
+    
+    if (!body.number) {
         return res.status(400).json({
             error: 'number missing'
         })
-    } else if (personName.includes(body.name)) {
+    } 
+
+    /*     } else if (personName.includes(body.name)) {
         return res.status(400).json({
             error: 'name must be unique'
         })
-    }
-
+    } */
 
     const person = new Person({
         id: generateId(),
