@@ -1,13 +1,5 @@
 const mongoose = require('mongoose')
 
-/* if (process.argv.length<3) {
-    console.log('give password as argument')
-    process.exit(1)
-}
-
-const password = process.argv[2]
- */
-
 const url = process.env.MONGODB_URI
 
 console.log('connecting to', url)
@@ -33,25 +25,3 @@ personSchema.set('toJSON', {
 })
 
 module.exports = mongoose.model('Person', personSchema)
-
-/* module.exports = Personmodel
-
-
-const person = new Personmodel({
-    name: process.argv[3],
-    number: process.argv[4]
-})
-
-if (process.argv.length<4) {
-    Personmodel.find({}).then(result => {
-        result.forEach(person => {
-            console.log(person)
-        })
-    mongoose.connection.close()
-    })
-} else {
-    person.save().then(result => {
-        console.log(`added ${person.name} number ${person.number} to phonebook`)
-        mongoose.connection.close()
-    })
-} */

@@ -101,10 +101,22 @@ app.delete('/api/persons/:id', (req, res, next) => {
         })
         .catch(error => next(error))
     
-/*     const id = Number(req.params.id)
-    persons = persons.filter(person => person.id !== id)
+})
 
-    res.status(204).end() */
+app.put('/api/persons/:id', (req, res, next) => {
+    const body = req.body
+
+    const person = {
+        id: generateId(),
+        name: body.name,
+        number: body.number
+    }
+
+    Person.findByIdAndUpdate(req.params.id, person, { new: true})
+        .then(updatedPerson => {
+            res.json(updatedPerson)
+        })
+        .catch(error => next(error))
 })
 
 app.post('/api/persons', (req,res) => {
