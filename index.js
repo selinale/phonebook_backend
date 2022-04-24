@@ -74,6 +74,7 @@ app.get('/info', (req, res) => {
             ${new Date()}`)
 })
 
+
 app.get('/api/persons', (req, res) => {
     Person.find({}).then(persons => {
         res.json(persons)
