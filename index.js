@@ -126,12 +126,11 @@ app.post('/api/persons', (req,res) => {
     }
 
 
-    const person = {
+    const person = new Person({
         id: generateId(),
         name: body.name,
         number: body.number
-    }
-    // persons = persons.concat(person)
+    })
     
     person.save().then(savedPerson => {
         res.json(savedPerson)
